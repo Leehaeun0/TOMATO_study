@@ -101,9 +101,6 @@ const getTodayDone = () => {
 const getTodayGoalTIme = () => {
   let [hour, min] = [0, 0];
   todayTodos.forEach(todo => {
-    // const timeArray = [...todo.goalTime].filter(num => num !== ':');
-    // hour += +timeArray[0];
-    // min += +(timeArray[1] + timeArray[2]);
     const [goalHour, goalMin] = todo.goalTime.split(':', 2);
     hour += +goalHour;
     min += +goalMin;
@@ -172,11 +169,8 @@ const getData = async () => {
 
     todos = await fetch('/todos').then(res => res.json());
     filterTodayTodos();
-    // getToday(todos);
     getTodayDone();
     render();
-    // getTodayGoalTIme();
-    // getTodayPersent();
   } catch (e) {
     console.error('Error:', e);
   }
@@ -187,17 +181,11 @@ const removeActive = () => {
 };
 
 const timerClosure = (() => {
-  // let count = 0;
   const countTime = (elementName, [_hour, _min, _sec]) => {
     let [hour, min, sec] = [_hour, _min, _sec];
 
     if (!elementName.matches('.simulationTime') && !elementName.matches('.totalTime')) return;
     sec++;
-    // count++;
-    // if (count > 9) {
-    //   count = 0;
-    //   sec++;
-    // }
     if (sec > 59) {
       sec = 0;
       min++;
@@ -249,17 +237,10 @@ const popupControl = (() => {
 
 // 스탑워치 시작
 const startStopWatch = () => {
-  // play = !play;
-  // if (play === false) return;
   play = true;
   
   const timer = setInterval(() => {
-    // play = true;
-
-    // if (!play) {  
-    //   clearInterval(timer);
-    //   return;
-    // }
+    
     if (popupControl.containPlay()) {
       play = false;
       clearInterval(timer);
@@ -275,7 +256,6 @@ const startStopWatch = () => {
     }
     timerClosure.name($totalTime);
     timerClosure.name(popupControl.simulationTime());
-    // play = true;
 
     if (!play) {  
       clearInterval(timer);
@@ -437,57 +417,34 @@ const renderEditTodo = target => {
   });
 };
 
-const removeEdit = () => {
-  $addTodosPopup.classList.remove('active');
-};
+const removeEdit = () => $addTodosPopup.classList.remove('active');
 
-const getContent = () => {
-  const $todoInput = document.querySelector('.editTodos .addInput > .todoInput input');
-  return $todoInput.value;
-};
+const getContent = () => $addTodosPopup.querySelector('.editTodos .addInput > .todoInput input').value;
 
-const getGoal = () => {
-  const $selectGoals = document.querySelector('.editTodos .addInput .category select');
-  return +$selectGoals.value;
-};
+const getGoal = () => +$addTodosPopup.querySelector('.editTodos .addInput .category select').value;
 
-const getColor = () => {
-  return goals.find(goal => goal.id === getGoal()).color;
-};
+const getColor = () => goals.find(goal => goal.id === getGoal()).color;
 
-const getDate = () => {
-  const $startDate = document.querySelector('.editTodos li.startDate input');
-  return $startDate.value;
-};
+const getDate = () => $addTodosPopup.querySelector('.editTodos li.startDate input').value;
 
-const getDayNum = () => {
-  const date = getDate();
-  const day = new Date(+(date[0] + date[1] + date[2] + date[3]), +(date[5] + date[6]) - 1, +(date[8] + date[9]));
-  return day.getDay();
-};
+const getDayNum = () => new Date(getDate()).getDay;
 
-const getImp = () => {
-  const $btnImp = document.querySelector('.editTodos li.impSelect .btnImp');
-  return $btnImp.classList.contains('impCheck');
-};
+const getImp = () => $addTodosPopup.querySelector('.editTodos li.impSelect .btnImp').classList.contains('impCheck');
 
 const getStart = () => {
-  const $startHour = document.querySelector('.editTodos .startTime input');
-  const $startMin = document.querySelector('.editTodos .startTime select');
+  const $startHour = $addTodosPopup.querySelector('.editTodos .startTime input');
+  const $startMin = $addTodosPopup.querySelector('.editTodos .startTime select');
   return `${addZero($startHour.value)}:${addZero(($startMin.value - 1) * 10)}`;
 };
 
-const getDetail = () => {
-  const $detail = document.querySelector('.editTodos li.contentInput > textarea');
-  return $detail.value;
-};
-
 const getGoalTm = () => {
-  const $goalTime = document.querySelector('.editTodos .goalTime select');
+  const $goalTime = $addTodosPopup.querySelector('.editTodos .goalTime select');
   const text = [...$goalTime.children].find(option => $goalTime.value === option.value).textContent;
   if (text === '30분') return '0:30';
   return text.includes('분') ? `${text[0]}:30` : `${text[0]}:00`;
 };
+
+const getDetail = () => $addTodosPopup.querySelector('.editTodos li.contentInput > textarea').value;
 
 // const getGoalTm = () => {
 //   const $goalTime = +document.querySelector('.editTodos .goalTime select').value;
@@ -547,20 +504,15 @@ $todoList.onclick = e => {
   if (e.target.matches('.todoList > li > .todoTitSet > *')) addDetail(e.target.parentNode);
   if (e.target.matches('.todoList > li')) e.target.classList.toggle('ing');
   if (e.target.matches('.todoList > li > .btnDelete')) deletePopup(e.target);
-  // if (e.target.matches('.todoList > li > .btnDelete')) $deletePopup.classList.add('active');
-  // if (e.target.matches('.todoList > li > .btnDelete')) deleteTodo(e.target);
   if (e.target.matches('.todoList > li > .btnEdit')) renderEditTodo(e.target);
 };
-// getTodayGoalTIme();
-// getTodayPersent();
+
 const deleteTodo = () => {
 
   fetch(`/todos/${targetId}`, { method: 'DELETE' })
     .then(res => res.json())
     .then(() => todayTodos = todayTodos.filter(todo => todo.id !== targetId))
     .then(render)
-    // .then(getTodayGoalTIme)
-    // .then(getTodayPersent)
     .catch(error => console.error('Error:', error));
   $deletePopup.classList.remove('active');
 };
@@ -580,8 +532,6 @@ const patchTimer = target => {
     .then(res => res.json())
     .then(data => todayTodos = todayTodos.map(todo => (todo.id === +matchId ? data : todo)))
     .then(render)
-    // .then(getTodayGoalTIme)
-    // .then(getTodayPersent)
     .catch(error => console.error('Error:', error));
 };
 
@@ -596,25 +546,10 @@ $timerPopup.onclick = e => {
   }
   if (e.target.matches('.timer > .stopTimer > .btnStopWatch')) {
     e.target.classList.toggle('play');
-    // play = !play;
-    // if (!popupControl.containPlay()) startStopWatch();
-    // if (!play) startStopWatch();
     if (play) return;
-    // play = !play;
-    // if (!play) return;
     startStopWatch();
   }
 };
-
-
-
-
-
-
-
-
-
-
 
 
 

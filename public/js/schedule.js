@@ -304,7 +304,7 @@ const editSche = async () => {
     //   dayTodos = dayTodos.filter(todo => (todo.id !== data.id));
     // }
     // dayTodos = dayTodos.map(todo => (todo.id === targetId ? data : todo));
-    // if문 부터 5줄을 주석 2줄로 간단히 바꿀 수 있지만 데이터가 큰 todos는 최대한 적게 돌도록 노력해봤다.
+    // if문 부터 5줄을 밑의 2줄로 간단히 바꿀 수 있지만 데이터가 큰 todos는 최대한 적게 돌도록 노력해봤다.
     todos = todos.map(todo => (todo.id === targetId ? data : todo));
     // getDayTodos(); 
     renderSche();
@@ -313,40 +313,6 @@ const editSche = async () => {
     console.error('Error:', e);
   }
 };
-// const editSche = () => {
-//   // 인풋이 비어있으면 리턴하기 추가
-//   fetch(`/todos/${targetId}`, {
-//     method: 'PATCH',
-//     headers: { 'Content-Type': 'application/json' },
-//     body: JSON.stringify({
-//       content: _getContent(),
-//       goal: _getGoal(),
-//       color: _getColor(),
-//       date: _getDate(),
-//       day: _getDayNum(),
-//       // important: _getImp(),
-//       // startTime: _getStart(),
-//       goalTime: _getGoalTime(),
-//       // detail: _getDetail(),
-//     })
-//   }).then(res => res.json())
-//     // .then(data => {
-//     //   let _dayTodos = [];
-//     //   dayTodos.forEach(todo => {
-//     //     if (data.date !== ($selectDate.value || generateDateCW(new Date()))) return;
-//     //     // console.log('222' + $selectDate.value, generateDateCW(new Date()), data.date);
-//     //     _dayTodos = [..._dayTodos, (todo.id === targetId ? data : todo)];
-//     //     console.log(1);
-//     //   });
-//     //   dayTodos = _dayTodos;
-//     //   console.log(dayTodos);
-//     // })
-//     .then(data => dayTodos = dayTodos.map(todo => (todo.id === targetId ? data : todo)))
-//     // .then(_dayTodos => dayTodos = _dayTodos.filter(todo => (todo.id === targetId ? data : todo)))
-//     .then(renderSche)
-//     .then(removeEditSche) 
-//     .catch(error => console.error('Error:', error));
-// };
 
 // 수정 팝업창
 $editScheTodo.onclick = e => {
