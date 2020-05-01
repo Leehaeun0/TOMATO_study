@@ -290,7 +290,7 @@ nav {
   background-color: rgba(0, 0, 0, .6);
   z-index: 150;
 }
-.popup.active .warnDay, .popup.active .warnTime, 
+/* .popup.active .warnDay, .popup.active .warnTime, 
 .popup.active .warnRepeat, .popup.active .warnValue {display: none;}
 .popup.active .warnDay.active, .popup.active .warnTime.active, 
 .popup.active .warnRepeat.active, .popup.active .warnValue.active {
@@ -298,12 +298,12 @@ nav {
   position: absolute;
   bottom: 70px;
   color: #FF551F;
-  font-size: 1.2rem;
+  font-size: 1.rem;
   transform: translateX(50%);
   right: 50%;
-}
+} */
 
-.addTodos.popup {height: 635px;}
+.addTodos.popup {height: 630px;}
 .addGoal.popup, .editGoal.popup {height: 362px;}
 .timer.popup {height: 250px;}
 
