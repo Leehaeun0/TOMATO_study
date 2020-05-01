@@ -251,7 +251,7 @@ nav {
   z-index: 200;
 }
 .popup h3 {
-  margin-bottom: 40px;
+  margin-bottom: 23px;
   font-size: 20px;
   font-weight: 400;
 }
@@ -290,8 +290,20 @@ nav {
   background-color: rgba(0, 0, 0, .6);
   z-index: 150;
 }
+.popup.active .warnDay, .popup.active .warnTime, 
+.popup.active .warnRepeat, .popup.active .warnValue {display: none;}
+.popup.active .warnDay.active, .popup.active .warnTime.active, 
+.popup.active .warnRepeat.active, .popup.active .warnValue.active {
+  display: block;
+  position: absolute;
+  bottom: 70px;
+  color: #FF551F;
+  font-size: 1.2rem;
+  transform: translateX(50%);
+  right: 50%;
+}
 
-.addTodos.popup {height: 666px;}
+.addTodos.popup {height: 635px;}
 .addGoal.popup, .editGoal.popup {height: 362px;}
 .timer.popup {height: 250px;}
 
@@ -308,8 +320,14 @@ nav {
   color: #707070;
   border-bottom: 1px solid #cecece;
 }
-.todoInput {width: 232px;}
-.impSelect {position: relative;}
+.todoInput {
+  width: 232px;
+  height: 50px;
+}
+.impSelect {
+  position: relative;
+  height: 40px;
+}
 .impSelect  label {
   width: 40px;
   height: 40px;
@@ -342,7 +360,7 @@ nav {
   border-bottom: 1px solid #cecece;
 }
 .contentInput {width: 100%;}
-.contentInput textarea {height: 80px;}
+.contentInput textarea {height: 70px;}
 .startTime, .goalTime {
   display: flex;
   flex-wrap: wrap;

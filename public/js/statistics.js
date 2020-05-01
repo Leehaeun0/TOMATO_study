@@ -584,7 +584,10 @@ $addTodos.onchange = ({ target }) => {
 window.onload = () => {
   const now = new Date();
   // 날짜 선택 최소 값 설정
-  document.querySelectorAll('input[type="date"]').forEach(input => input.min = generateDate(now));
+  document.querySelectorAll('input[type="date"]').forEach(input => {
+    input.min = generateDate(now);
+    input.value = generateDate(now);
+  });
   // 시간 선택 최소 최대 값 설정
   $addTodoStart.hour.max = 23;
   $addTodoStart.hour.min = 6;

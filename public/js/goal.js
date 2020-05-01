@@ -164,7 +164,7 @@ const addTodos = async () => {
 
   // 할일 일정이 오늘 이후인지 확인
   if (new Date($addTodoDate.value) - new Date(generateDate(now)) < 0) {
-    window.alert('시작 날짜를 오늘 이후로 선택하십시요.');
+    window.alert('시작 날짜를 오늘 이후로 선택하십시오.');
     return;
   }
 
@@ -447,7 +447,10 @@ $deleteGoal.onclick = ({ target }) => {
 // 로드 이벤트
 window.onload = async () => {
   // 날짜 선택 최소 값 설정
-  document.querySelectorAll('input[type="date"]').forEach(input => input.min = generateDate(now));
+  document.querySelectorAll('input[type="date"]').forEach(input => {
+    input.min = generateDate(now);
+    input.value = generateDate(now);
+  });
   // 시간 선택 최소 최대 값 설정
   $addTodoStart.hour.max = 23;
   $addTodoStart.hour.min = 6;

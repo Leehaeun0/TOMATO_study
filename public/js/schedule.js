@@ -531,5 +531,6 @@ $addTodos.onchange = ({ target }) => {
 window.onload = () => {
   // 날짜 선택 최소 값 설정
   $addTodos.querySelectorAll('input[type="date"]').forEach(input => input.min = generateDateCW(now));
+  document.querySelectorAll('input[type="date"]').forEach(input => input.value = generateDateCW(now));
   getData();
 };

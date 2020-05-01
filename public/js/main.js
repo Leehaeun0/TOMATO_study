@@ -305,7 +305,7 @@ const toggleCheck = target => {
 };
 
 const selectGoals = todo => {
-  const $selectGoals = document.querySelector('.editTodos .addInput .category select');
+  const $selectGoals = $addTodosPopup.querySelector('.editTodos .addInput .category select');
   let html = `<option value="${todo.goal}">${goals.find(goal => goal.id === +todo.goal).content}</option>`;
   goals.forEach(goal => {
     if (goal.id === todo.goal) return;
@@ -324,15 +324,15 @@ const getGoalTime = ({ goalTime }) => {
   if (goalTime === '3:30') return 7;
   if (goalTime === '4:00') return 8;
   if (goalTime === '4:30') return 9;
-  if (goalTime === '5:00') return 10;
+  return 10;
 };
 
 const giveValue = todo => {
-  const $todoInput = document.querySelector('.editTodos .addInput > .todoInput input');
-  const $startMin = document.querySelector('.editTodos .startTime select');
-  const $startHour = document.querySelector('.editTodos .startTime input');
-  const $goalTime = document.querySelector('.editTodos .goalTime select');
-  const $startDate = document.querySelector('.editTodos li.startDate input');
+  const $todoInput = $addTodosPopup.querySelector('.editTodos .addInput > .todoInput input');
+  const $startMin = $addTodosPopup.querySelector('.editTodos .startTime select');
+  const $startHour = $addTodosPopup.querySelector('.editTodos .startTime input');
+  const $goalTime = $addTodosPopup.querySelector('.editTodos .goalTime select');
+  const $startDate = $addTodosPopup.querySelector('.editTodos li.startDate input');
   // const $endDate = document.querySelector('.editTodos li.endDate input');
 
   $todoInput.value = todo.content;
@@ -346,10 +346,12 @@ const giveValue = todo => {
     $startMin, $startHour, $goalTime, $startDate 
   };
 };
-const generateDate = time => `${time.getFullYear()}-${time.getMonth() > 9 ? time.getMonth() + 1 : '0' + (time.getMonth() + 1)}-${time.getDate()}`;
-const minDate = () => {
-  [...document.querySelectorAll('input[type="date"]')].forEach(input => input.min = generateDate(new Date()));
-};
+
+const generateDate = time => `${time.getFullYear()}-${addZero(time.getMonth() + 1)}-${addZero(time.getDate())}`;
+const limitDate = () => [...$addTodosPopup.querySelectorAll('input[type="date"]')].forEach(input => {
+  input.min = generateDate(new Date());
+  console.log(11);
+});
 
 const renderEditTodo = target => {
   $addTodosPopup.classList.add('active');
@@ -411,9 +413,9 @@ const renderEditTodo = target => {
       <button class="btnCancel">취소</button>
       <button class="btnRegister">등록</button>`;
     
-    giveValue(todo);
     selectGoals(todo);
-    minDate();
+    giveValue(todo);
+    limitDate();
   });
 };
 
@@ -460,8 +462,22 @@ const getDetail = () => $addTodosPopup.querySelector('.editTodos li.contentInput
 //   return '5:00';
 // };
 
+// popup에 빈 input 있는지 확인하는 함수
+const checkValue = popupTarget => {
+  const inputAll = popupTarget.querySelectorAll('input:not(#dateEnd)');
+  const selectAll = popupTarget.querySelectorAll('select');
+  const inputCk = inputAll.length ? [...inputAll].every(input => input.value.trim()) : true;
+  const selectCk = selectAll.length ? [...selectAll].every(select => select.value) : true;
+  return inputCk && selectCk;
+};
+
 const editTodo = target => {
-  // 인풋이 비어있으면 리턴하기 추가
+
+  // if (checkValue($addTodosPopup)) {
+    
+  //   return;
+  // }
+  
   const id = +target.parentNode.firstElementChild.id;
   fetch(`/todos/${id}`, {
     method: 'PATCH',
@@ -593,14 +609,7 @@ const transSecond = (hh = 0, mm = 0, ss = 0) => {
   return count;
 };
 
-// popup에 빈 input 있는지 확인하는 함수
-const checkValue = popupTarget => {
-  const inputAll = popupTarget.querySelectorAll('input:not(#dateEnd)');
-  const selectAll = popupTarget.querySelectorAll('select');
-  const inputCk = inputAll.length ? [...inputAll].every(input => input.value.trim()) : true;
-  const selectCk = selectAll.length ? [...selectAll].every(select => select.value) : true;
-  return inputCk && selectCk;
-};
+
 // 시간이 중복되는지 확인하는 함수
 const checkTime = (date, time, goalTime) => {
   const filterDate = todos.filter(todo => todo.date === date);
@@ -749,7 +758,10 @@ $addTodos.onchange = ({ target }) => {
 /* 치원님 할일 추가 code 종료 */
 window.onload = () => {
   // 날짜 선택 최소 값 설정
-  document.querySelectorAll('input[type="date"]').forEach(input => input.min = generateDateCW(now));
+  document.querySelectorAll('input[type="date"]').forEach(input => {
+    input.min = generateDateCW(now);
+    input.value = generateDateCW(now);
+  });
   // 시간 선택 최소 최대 값 설정
   $addTodoStart.hour.max = 23;
   $addTodoStart.hour.min = 6;
