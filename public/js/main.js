@@ -2,6 +2,7 @@ import {
   generateId,
   openPopup,
   closePopup,
+  openAlert,
   popup
 } from './common.js';
 
@@ -350,7 +351,6 @@ const giveValue = todo => {
 const generateDate = time => `${time.getFullYear()}-${addZero(time.getMonth() + 1)}-${addZero(time.getDate())}`;
 const limitDate = () => [...$addTodosPopup.querySelectorAll('input[type="date"]')].forEach(input => {
   input.min = generateDate(new Date());
-  console.log(11);
 });
 
 const renderEditTodo = target => {
@@ -436,7 +436,7 @@ const getImp = () => $addTodosPopup.querySelector('.editTodos li.impSelect .btnI
 const getStart = () => {
   const $startHour = $addTodosPopup.querySelector('.editTodos .startTime input');
   const $startMin = $addTodosPopup.querySelector('.editTodos .startTime select');
-  return `${addZero($startHour.value)}:${addZero(($startMin.value - 1) * 10)}`;
+  return `${addZero(Math.floor($startHour.value))}:${addZero(($startMin.value - 1) * 10)}`;
 };
 
 const getGoalTm = () => {
@@ -462,7 +462,7 @@ const getDetail = () => $addTodosPopup.querySelector('.editTodos li.contentInput
 //   return '5:00';
 // };
 
-// popup에 빈 input 있는지 확인하는 함수
+// 인터락 코드 시작
 const checkValue = popupTarget => {
   const inputAll = popupTarget.querySelectorAll('input:not(#dateEnd)');
   const selectAll = popupTarget.querySelectorAll('select');
@@ -471,14 +471,64 @@ const checkValue = popupTarget => {
   return inputCk && selectCk;
 };
 
-const editTodo = target => {
+const generateDateCW = time => `${
+  time.getFullYear()
+}-${
+  time.getMonth() > 9 ? time.getMonth() + 1 : '0' + (time.getMonth() + 1)
+}-${
+  time.getDate() > 9 ? time.getDate() : '0' + time.getDate()
+}`;
 
-  // if (checkValue($addTodosPopup)) {
-    
+const transSecond = (hh = 0, mm = 0, ss = 0) => {
+  let count = 0;
+  count += +hh * 3600;
+  count += +mm * 60;
+  count += +ss;
+  return count;
+};
+
+// 시간이 중복되는지 확인하는 함수
+const checkTime = (date, time, goalTime) => {
+  const filterDate = todos.filter(todo => todo.date === date);
+  const todosTime = filterDate.map(todo => [transSecond(...todo.startTime.split(':')), transSecond(...todo.goalTime.split(':'))]);
+  const targetTime = transSecond(...time.split(':'));
+  const targetGoal = transSecond(...goalTime.split(':'));
+  
+  return (todosTime.every(timeArr => {
+    const check = timeArr[0] - targetTime;
+    return check > 0 ? check - targetGoal >= 0 : check + timeArr[1] <= 0;
+  }));
+};
+
+const editTodo = target => {
+  const id = +target.parentNode.firstElementChild.id;
+
+  // 입력란 확인
+  if (!checkValue($addTodosPopup)) {
+    openAlert('필수 입력란이 전부 채워지지 않았습니다.');
+    return;
+  }
+
+  // 할일 일정이 오늘 이후인지 확인
+  if (new Date(getDate()) - new Date(generateDateCW(now)) < 0) {
+    openAlert('시작 날짜를 오늘 이후로 선택하십시요.');
+    return;
+  }
+
+  const hour = $addTodosPopup.querySelector('.editTodos .startTime input').value;
+  // 시작 시간이 6 - 23 인지 확인
+  if (hour < 6 || hour > 23) {
+    openAlert('시작 시간은 6시부터 23시까지 입니다.');
+    return;
+  }
+
+  // 중복 예정 확인
+  // if (!checkTime(getDate(), getStart(), getGoalTm())) {
+  //   if (id === targetId) return;
+  //   openAlert('할일 예정이 다른 예정과 겹칩니다.');
   //   return;
   // }
-  
-  const id = +target.parentNode.firstElementChild.id;
+
   fetch(`/todos/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
@@ -593,36 +643,11 @@ const $addTodoDetail = $addTodos.querySelector('.contentInput #todoDetail');
 
 // 함수
 // 숫자 생성
-const generateDateCW = time => `${
-  time.getFullYear()
-}-${
-  time.getMonth() > 9 ? time.getMonth() + 1 : '0' + (time.getMonth() + 1)
-}-${
-  time.getDate() > 9 ? time.getDate() : '0' + time.getDate()
-}`;
-
-const transSecond = (hh = 0, mm = 0, ss = 0) => {
-  let count = 0;
-  count += +hh * 3600;
-  count += +mm * 60;
-  count += +ss;
-  return count;
-};
 
 
-// 시간이 중복되는지 확인하는 함수
-const checkTime = (date, time, goalTime) => {
-  const filterDate = todos.filter(todo => todo.date === date);
-  const todosTime = filterDate.map(todo => [transSecond(...todo.startTime.split(':')), transSecond(...todo.goalTime.split(':'))]);
-  const targetTime = transSecond(...time.split(':'));
-  const targetGoal = transSecond(...goalTime.split(':'));
-  
-  return (todosTime.every(timeArr => {
-    const check = timeArr[0] - targetTime;
-    return check > 0 ? check - targetGoal >= 0 : check + timeArr[1] <= 0;
-  }));
-};
-const todoGoalOption = (hour, minute) => {
+
+// const todoGoalOption = (hour, minute) => {
+const todoGoalOption = () => {
   let html = '';
   // if (hour < 19 || (hour === 19 && !minute)) {
     
@@ -658,27 +683,27 @@ const resetAddtodo = () => {
 const addTodos = async () => {
   // 입력란 확인
   if (!checkValue($addTodos)) {
-    window.alert('필수 입력란이 전부 채워지지 않았습니다.');
+    openAlert('필수 입력란이 전부 채워지지 않았습니다.');
     return;
   }
 
   // 할일 일정이 오늘 이후인지 확인
   if (new Date($addTodoDate.value) - new Date(generateDateCW(now)) < 0) {
-    window.alert('시작 날짜를 오늘 이후로 선택하십시요.');
+    openAlert('시작 날짜를 오늘 이후로 선택하십시요.');
     return;
   }
 
-  const hour = $addTodoStart.hour.value;
+  const hour = Math.floor($addTodoStart.hour.value);
   const minute = $addTodoStart.minute.value;
   // 시작 시간이 6 - 23 인지 확인
   if (hour < 6 || hour > 23) {
-    window.alert('시작 시간은 6시부터 23시까지 입니다.');
+    openAlert('시작 시간은 6시부터 23시까지 입니다.');
     return;
   }
 
   // 중복 예정 확인
   if (!checkTime($addTodoDate.value, `${hour}:${minute}`, $addTodoGTime.value)) {
-    window.alert('할일 예정이 다른 예정과 겹칩니다.');
+    openAlert('할일 예정이 다른 예정과 겹칩니다.');
     return;
   }
 
@@ -703,7 +728,8 @@ const addTodos = async () => {
     });
     const todo = await _todo.json();
     todos = [...todos, todo];
-    window.alert('할일이 추가되었습니다.');
+    openAlert('할일이 추가되었습니다.');
+
     closePopup($addTodos);
     filterTodayTodos();
     // render();

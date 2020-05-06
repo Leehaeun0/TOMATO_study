@@ -2,6 +2,7 @@ import {
   generateId,
   openPopup,
   closePopup,
+  openAlert,
   popup
 } from './common.js';
 
@@ -204,36 +205,36 @@ const renderEditSche = () => {
     <h3 id="${todo.id}">할일 수정</h3>
     <ul class="addInput">
       <li class="category">
-        <label for="" class="a11yHidden">목표 선택</label>
+        <label for="categorySelect" class="a11yHidden">목표 선택</label>
         <select id="categorySelect" class="categorySelect">
           <option value="">목표를 선택하세요</option>
         </select>
       </li>
       <li class="todoInput">
-        <label for="" class="a11yHidden">할일 입력</label>
-        <input type="text" placeholder="할일을 입력하세요">
+        <label for="addTodoContent" class="a11yHidden">할일 입력</label>
+        <input type="text" id="addTodoContent" placeholder="할일을 입력하세요">
       </li>
       <li class="impSelect"><label for="test" class="a11yHidden btnImpLabel">중요</label>
         <button class="btnImp${todo.important ? ' impCheck' : ''}" id="test">중요</button>
       </li>
       <li class="startDate">
-        <label for="">시작 날짜</label>
-        <input type="date" name="" id="">
+        <label for="addDateStart">시작 날짜</label>
+        <input type="date" name="addDateStart" id="addDateStart">
       </li>
       <li class="startTime">
-        <label for="">공부 시작시간</label>
-        <input type="number" name="" id="" placeholder="입력하세요"><span>시</span>
+        <label for="addStartTime">공부 시작시간</label>
+        <input type="number" name="addStartTime" id="addStartTime" placeholder="입력하세요"><span>시</span>
         <select name="country" id="countrySelectBox">
         </select><span>분</span>
       </li>
       <li class="goalTime">
-        <label for="">목표 공부시간</label>
+        <label for="countrySelectBox">목표 공부시간</label>
         <select name="country" id="countrySelectBox">
         </select>
       </li>
       <li class="contentInput">
-        <label for="" class="a11yHidden">상세 내용 입력</label>
-        <textarea name="" id="" cols="30" rows="10" placeholder="상세 내용을 입력하세요">${todo.detail}</textarea>
+        <label for="addTodoDetail" class="a11yHidden">상세 내용 입력</label>
+        <textarea name="detail" id="addTodoDetail" cols="30" rows="10" placeholder="상세 내용을 입력하세요">${todo.detail}</textarea>
       </li>
     </ul>
     <button class="btnCancel">취소</button>
@@ -270,19 +271,58 @@ const _getGoalTime = () => {
 
 const _getDetail = () => $editScheTodo.querySelector('li.contentInput > textarea').value;
 
-const generateDateCW = time => `${
-  time.getFullYear()
-}-${
-  time.getMonth() > 9 ? time.getMonth() + 1 : '0' + (time.getMonth() + 1)
-}-${
-  time.getDate() > 9 ? time.getDate() : '0' + time.getDate()
-}`;
+
+// popup에 빈 input 있는지 확인하는 함수
+const checkValue = popupTarget => {
+  const inputAll = popupTarget.querySelectorAll('input:not(#dateEnd)');
+  const selectAll = popupTarget.querySelectorAll('select');
+  const inputCk = inputAll.length ? [...inputAll].every(input => input.value.trim()) : true;
+  const selectCk = selectAll.length ? [...selectAll].every(select => select.value) : true;
+  return inputCk && selectCk;
+};
+
+const transSecond = (hh = 0, mm = 0, ss = 0) => {
+  let count = 0;
+  count += +hh * 3600;
+  count += +mm * 60;
+  count += +ss;
+  return count;
+};
+
+// 시간이 중복되는지 확인하는 함수
+const checkTime = (date, time, goalTime) => {
+  const filterDate = todos.filter(todo => todo.date === date);
+  const todosTime = filterDate.map(todo => [transSecond(...todo.startTime.split(':')), transSecond(...todo.goalTime.split(':'))]);
+  const targetTime = transSecond(...time.split(':'));
+  const targetGoal = transSecond(...goalTime.split(':'));
+  
+  return (todosTime.every(timeArr => {
+    const check = timeArr[0] - targetTime;
+    return check > 0 ? check - targetGoal >= 0 : check + timeArr[1] <= 0;
+  }));
+};
 
 const removeEditSche = () => $editScheTodo.classList.remove('active');
 
 const editSche = async () => {
+
+  if (!checkValue($editScheTodo)) {
+    openAlert('필수 입력란이 전부 채워지지 않았습니다.');
+    return;
+  }
+  
+  const hour = $editScheTodo.querySelector('.editTodos .startTime input').value;
+  if (hour < 6 || hour > 23) {
+    openAlert('시작 시간은 6시부터 23시까지 입니다.');
+    return;
+  }
+  
+  // if (!checkTime(_getDate(), _getStart(), _getGoalTime())) {
+  //   openAlert('할일 예정이 다른 예정과 겹칩니다.');
+  //   return;
+  // }
+  
   let data = {};
-  // 인풋이 비어있으면 리턴하기 추가
   try {
     data = await fetch(`/todos/${targetId}`, {
       method: 'PATCH',
@@ -363,35 +403,16 @@ const $addTodoDetail = $addTodos.querySelector('.contentInput #todoDetail');
 // 함수
 // 숫자 생성
 
-const transSecond = (hh = 0, mm = 0, ss = 0) => {
-  let count = 0;
-  count += +hh * 3600;
-  count += +mm * 60;
-  count += +ss;
-  return count;
-};
+const generateDateCW = time => `${
+  time.getFullYear()
+}-${
+  time.getMonth() > 9 ? time.getMonth() + 1 : '0' + (time.getMonth() + 1)
+}-${
+  time.getDate() > 9 ? time.getDate() : '0' + time.getDate()
+}`;
 
-// popup에 빈 input 있는지 확인하는 함수
-const checkValue = popupTarget => {
-  const inputAll = popupTarget.querySelectorAll('input:not(#dateEnd)');
-  const selectAll = popupTarget.querySelectorAll('select');
-  const inputCk = inputAll.length ? [...inputAll].every(input => input.value.trim()) : true;
-  const selectCk = selectAll.length ? [...selectAll].every(select => select.value) : true;
-  return inputCk && selectCk;
-};
-// 시간이 중복되는지 확인하는 함수
-const checkTime = (date, time, goalTime) => {
-  const filterDate = todos.filter(todo => todo.date === date);
-  const todosTime = filterDate.map(todo => [transSecond(...todo.startTime.split(':')), transSecond(...todo.goalTime.split(':'))]);
-  const targetTime = transSecond(...time.split(':'));
-  const targetGoal = transSecond(...goalTime.split(':'));
-  
-  return (todosTime.every(timeArr => {
-    const check = timeArr[0] - targetTime;
-    return check > 0 ? check - targetGoal >= 0 : check + timeArr[1] <= 0;
-  }));
-};
-const todoGoalOption = (hour, minute) => {
+// const todoGoalOption = (hour, minute) => {
+const todoGoalOption = () => {
   let html = '';
   // if (hour < 19 || (hour === 19 && !minute)) {
     
@@ -407,7 +428,7 @@ const todoGoalOption = (hour, minute) => {
   <option value="4:00">4시간</option>
   <option value="4:30">4시간 30분</option>
   <option value="5:00">5시간</option>`;
-  console.log('시간에 따라 옵션 수 줄이기', hour, minute);
+  // console.log('시간에 따라 옵션 수 줄이기', hour, minute);
   $addTodoGTime.innerHTML = html;
 };
 // addTodo popup 초기화 함수
@@ -428,13 +449,14 @@ const resetAddtodo = () => {
 const addTodos = async () => {
   // 입력란 확인
   if (!checkValue($addTodos)) {
-    window.alert('필수 입력란이 전부 채워지지 않았습니다.');
+    openAlert('필수 입력란이 전부 채워지지 않았습니다.');
     return;
   }
 
   // 할일 일정이 오늘 이후인지 확인
   if (new Date($addTodoDate.value) - new Date(generateDateCW(now)) < 0) {
-    window.alert('시작 날짜를 오늘 이후로 선택하십시요.');
+    openAlert('시작 날짜를 오늘 이후로 선택하십시오.');
+
     return;
   }
 
@@ -442,13 +464,15 @@ const addTodos = async () => {
   const minute = $addTodoStart.minute.value;
   // 시작 시간이 6 - 23 인지 확인
   if (hour < 6 || hour > 23) {
-    window.alert('시작 시간은 6시부터 23시까지 입니다.');
+    openAlert('시작 시간은 6시부터 23시까지 입니다.');
+
     return;
   }
   
   // 중복 예정 확인
   if (!checkTime($addTodoDate.value, `${hour}:${minute}`, $addTodoGTime.value)) {
-    window.alert('할일 예정이 다른 예정과 겹칩니다.');
+    openAlert('할일 예정이 다른 예정과 겹칩니다.');
+
     return;
   }
 
@@ -473,9 +497,8 @@ const addTodos = async () => {
     });
     const todo = await _todo.json();
     todos = [...todos, todo];
-    window.alert('할일이 추가되었습니다.');
+    openAlert('할일이 추가되었습니다.');
     closePopup($addTodos);
-    console.log('조건에 따라서 뷰 랜더');
     // render();
     if ($addTodoDate.value === generateDateCW(now)) {
       // getDayTodos();
