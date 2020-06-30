@@ -1,7 +1,7 @@
 # TOMATO_study
-TOMATO study planner : Today My Todos
-소개 : https://github.com/Leehaeun0/TOMATO_study/blob/master/Tomato.pdf
-시연영상 : https://www.youtube.com/watch?v=0-lBB_2MuBo
+TOMATO study planner : Today My Todos    
+소개 : https://github.com/Leehaeun0/TOMATO_study/blob/master/Tomato.pdf    
+시연영상 : https://www.youtube.com/watch?v=0-lBB_2MuBo   
 
 <br />
 
